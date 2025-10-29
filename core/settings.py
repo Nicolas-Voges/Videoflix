@@ -35,6 +35,17 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(
 
 CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", default="http://localhost:4200").split(",")
 
+
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.environ.get("EMAIL_HOST", default="smtp.example.com")
+    EMAIL_PORT = os.environ.get("EMAIL_PORT", default=587)
+    EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", default="True") == "True"
+    EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", default="")
+    EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", default="")
+    DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", default="webmaster@localhost")
 # Application definition
 
 INSTALLED_APPS = [
