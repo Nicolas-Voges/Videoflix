@@ -86,5 +86,6 @@ class RegisterSerializer(serializers.ModelSerializer):
             counter += 1
 
         validated_data['username'] = username
+        validated_data['is_active'] = False
         user = User.objects.create_user(**validated_data)
         return user

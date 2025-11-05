@@ -24,6 +24,7 @@ class AuthTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(User.objects.filter(email=self.user_mail).exists())
+        self.assertFalse(User.objects.get(email=self.user_mail).is_active)
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn("Confirm your email", mail.outbox[0].subject)
         self.assertIn(self.user_mail, mail.outbox[0].to)
