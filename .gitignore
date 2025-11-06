@@ -43,3 +43,6 @@ htmlcov/
 # Static/Media files (falls automatisch generiert)
 staticfiles/
 media/
+
+# Email files for development
+sent_emails/
