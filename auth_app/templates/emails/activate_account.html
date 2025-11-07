@@ -1,0 +1,18 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<body>
+    <header style="display: flex; align-items: center; justify-content: center;">
+        <img src="{% static 'assets/logo_icon.svg' %}" alt="Logo">
+    </header>
+    <main>
+        <p>Dear <span style="color: #2e3edf;">{{ user.username }}</span>,</p>
+        <p style="margin-bottom: 32px;">Thank you for registering with <span style="color: #2e3edf;">Videoflix</span>. To complete your registration and verify your email address, please click the link below:</p>
+        <a style="padding: 16px 24px; border-radius: 100px; background-color: #2e3edf; color: white; text-decoration: none;" href="{{ activation_link }}"><strong>Activate account</strong></a>
+        <p style="margin-bottom: 32px; margin-top: 32px;">If you did not create an account with us, please disregard this email.</p>
+        <p style="margin-bottom: 32px;">Best regards,</p>
+        <p style="margin-bottom: 32px;">Your Videoflix Team.</p>
+    </main>
+</body>
+</html>

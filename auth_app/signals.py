@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 
 
 
@@ -11,11 +12,11 @@ def user_post_save_receiver(sender, instance, created, *args, **kwargs):
     print(f"Signal is running! Created: {created}")
     if created:
         print(f'New user created: {instance.username}')
-        subject = "hello"
-        from_email = "from@example.com"
+        subject = "Confirm your email"
+        from_email = "info@videoflix.com"
         to = instance.email
         text_content = "This is an important message."
-        html_content = "<p>This is an <strong style='color: blue;'>important</strong> message.</p>"
+        html_content = render_to_string("emails/activate_account.html", {"user": instance, "activation_link": f"http://example.com/activate/{instance.id}/token"})
         msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
         msg.attach_alternative(html_content, "text/html")
         msg.send()
