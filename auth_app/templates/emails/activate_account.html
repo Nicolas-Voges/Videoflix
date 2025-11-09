@@ -1,10 +1,11 @@
-{% load static %}
+{% comment %} {% load static %} {% endcomment %}
 
 <!DOCTYPE html>
 <html lang="en">
-<body>
+<body style="max-width: 1440px;">
     <header style="display: flex; align-items: center; justify-content: center;">
-        <img src="{% static 'assets/logo_icon.svg' %}" alt="Logo">
+        {% comment %} <img src="{% static 'assets/logo_icon.svg' %}" alt="Logo"> {% endcomment %}
+        <img src="http://localhost:8000/static/assets/logo_icon.svg" alt="Logo">
     </header>
     <main>
         <p>Dear <span style="color: #2e3edf;">{{ user.username }}</span>,</p>
