@@ -13,6 +13,7 @@ class AuthTests(APITestCase):
         self.user_mail = "user@example.com"
         self.register_url = reverse('register')
         self.register_data = {
+            'username': 'TestUser',
             'email': self.user_mail,
             'password': "securepassword",
             'confirmed_password': "securepassword"
