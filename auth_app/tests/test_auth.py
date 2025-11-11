@@ -16,7 +16,6 @@ class AuthTests(APITestCase):
     def setUp(self):
         self.user_mail = "user@example.com"
         self.register_url = reverse('register')
-        self.activision_url = reverse('activate')
         self.register_data = {
             'username': 'TestUser',
             'email': self.user_mail,
@@ -69,14 +68,11 @@ class AuthTests(APITestCase):
         )
         uidb64 = urlsafe_base64_encode(str(user.pk).encode('utf-8'))
         token = default_token_generator.make_token(user)
-        respons = self.client.get(
-            self.activision_url,
-            kwargs={'uidb64': uidb64, 'token': token}
-        )
+        response = self.client.get(reverse('activate', kwargs={"uidb64": uidb64, "token": token}))
 
         user.refresh_from_db()
 
-        self.assertEqual(respons.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(user.is_active)
 
 
@@ -92,10 +88,7 @@ class AuthTests(APITestCase):
         token = default_token_generator.make_token(user)
         invalid_token = token + "x"
 
-        response = self.client.get(
-            self.activision_url,
-            kwargs={"uidb64": uidb64, "token": invalid_token}
-        )
+        response = self.client.get(reverse('activate', kwargs={"uidb64": uidb64, "token": invalid_token}))
 
         user.refresh_from_db()
 
@@ -117,10 +110,7 @@ class AuthTests(APITestCase):
 
         time.sleep(2)
 
-        response = self.client.get(
-            self.activision_url,
-            kwargs={"uidb64": uidb64, "token": token}
-        )
+        response = self.client.get(reverse('activate', kwargs={"uidb64": uidb64, "token": token}))
 
         user.refresh_from_db()
 
