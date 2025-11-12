@@ -16,6 +16,7 @@ class AuthTests(APITestCase):
     def setUp(self):
         self.user_mail = "user@example.com"
         self.register_url = reverse('register')
+        self.login_url = reverse('login')
         self.register_data = {
             'username': 'TestUser',
             'email': self.user_mail,
@@ -116,3 +117,51 @@ class AuthTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertFalse(user.is_active)
+
+
+    def test_login_success(self):
+        username = "TestUser"
+        password = "Test123$"
+        user = User.objects.create_user(
+            username=username,
+            password=password,
+            email=self.user_mail,
+            is_active=True
+        )
+
+        response = self.client.post(self.login_url, {'email': self.user_mail, 'password': password}, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('access_token', response.cookies)
+        self.assertIn('refresh_token', response.cookies)
+
+
+    def test_post_fails(self):
+        username = "TestUser"
+        password = "Test123$"
+        user = User.objects.create_user(
+            username=username,
+            password=password,
+            email=self.user_mail,
+            is_active=True
+        )
+        user_mot_active = User.objects.create_user(
+            username='username',
+            password='password',
+            email='new@mail.de',
+            is_active=False
+        )
+
+        cases = [
+            ("wrong_username", {'username': username, 'password': 'wrong_password'}),
+            ("wrong_password", {'username': 'wrong', 'password': password}),
+            ("inactive_user", {'username': 'username', 'password': 'password'})
+        ]
+
+        for message, data in cases:
+            with self.subTest(test_case=message):
+                response = self.client.post(self.url, data, format='json')
+
+                self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+                self.assertNotIn('access_token', response.cookies)
+                self.assertNotIn('refresh_token', response.cookies)
