@@ -7,6 +7,7 @@ User instance when saved.
 
 import re
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.models import User
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -89,3 +90,33 @@ class RegisterSerializer(serializers.ModelSerializer):
         validated_data['is_active'] = False
         user = User.objects.create_user(**validated_data)
         return user
+
+
+class EmailLoginTokenObtainPairSerializer(TokenObtainPairSerializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if 'username' in self.fields:
+            self.fields.pop('username')
+
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        password = attrs.get('password')
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Invalid email or password")
+        
+        if not user.check_password(password):
+            raise serializers.ValidationError("Invalid email or password")
+        
+        if not user.is_active:
+            raise serializers.ValidationError("Confirm your email address to activate your account!")
+        
+        data = super().validate({'username': user.username, 'password': password})
+        return data
