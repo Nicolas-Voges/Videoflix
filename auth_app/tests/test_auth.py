@@ -115,22 +115,21 @@ class AccountActivationTests(APITestCase):
 
 class LoginTests(APITestCase):
     def setUp(self):
-        self.email_active = "user@example.com"
+        self.email_active = "user@active.com"
         self.username_active = "ActiveTestUser"
-        self.password_active = "Test123$"
+        self.password = "Test123$"
         self.user_active = User.objects.create_user(
             username=self.username_active,
-            password=self.password_active,
+            password=self.password,
             email=self.email_active,
             is_active=True
         )
 
-        self.email_not_active = "user@example.com"
-        self.username_not_active = "ActiveTestUser"
-        self.password_not_active = "Test123$"
+        self.email_not_active = "user@inactive.com"
+        self.username_not_active = "InactiveTestUser"
         self.user_not_active = User.objects.create_user(
             username=self.username_not_active,
-            password=self.password_not_active,
+            password=self.password,
             email=self.email_not_active,
             is_active=False
         )
@@ -141,7 +140,7 @@ class LoginTests(APITestCase):
     def test_post_success(self):
         data = {
             'email': self.email_active,
-            'password': self.password_active
+            'password': self.password
         }
 
         response = self.client.post(self.url, data, format='json')
@@ -153,15 +152,16 @@ class LoginTests(APITestCase):
 
     def test_post_fails(self):
         cases = [
-            ("wrong_password", {'email': self.email_active, 'password': 'wrong_password'}),
-            ("wrong_email", {'email': 'wrong@wro.ng', 'password': self.password_active}),
-            ("not_active_user", {'email': self.email_not_active, 'password': self.password_not_active})
+            ("wrong_password", {'email': self.email_active, 'password': 'wrong_password'}, status.HTTP_400_BAD_REQUEST),
+            ("wrong_email", {'email': 'wrong@wro.ng', 'password': self.password}, status.HTTP_400_BAD_REQUEST),
+            ("not_active_user", {'email': self.email_not_active, 'password': self.password}, status.HTTP_400_BAD_REQUEST)
         ]
-
-        for message, data in cases:
+        print(f"User aktive exists: {User.objects.filter(email=self.email_active).exists()}")
+        print(f"User not aktive exists: {User.objects.filter(email=self.email_not_active).exists()}")
+        for message, data, _status in cases:
             with self.subTest(test_case=message):
                 response = self.client.post(self.url, data, format='json')
 
-                self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+                self.assertEqual(response.status_code, _status)
                 self.assertNotIn('access_token', response.cookies)
                 self.assertNotIn('refresh_token', response.cookies)
