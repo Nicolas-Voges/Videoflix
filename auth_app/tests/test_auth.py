@@ -156,8 +156,7 @@ class LoginTests(APITestCase):
             ("wrong_email", {'email': 'wrong@wro.ng', 'password': self.password}, status.HTTP_400_BAD_REQUEST),
             ("not_active_user", {'email': self.email_not_active, 'password': self.password}, status.HTTP_400_BAD_REQUEST)
         ]
-        print(f"User aktive exists: {User.objects.filter(email=self.email_active).exists()}")
-        print(f"User not aktive exists: {User.objects.filter(email=self.email_not_active).exists()}")
+        
         for message, data, _status in cases:
             with self.subTest(test_case=message):
                 response = self.client.post(self.url, data, format='json')
