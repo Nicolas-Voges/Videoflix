@@ -14,7 +14,7 @@ from rest_framework_simplejwt.views import (
 )
 from rest_framework.exceptions import PermissionDenied, AuthenticationFailed
 
-from auth_app.api.serializers import RegisterSerializer, EmailTokenObtainPairSerializer
+from auth_app.api.serializers import RegisterSerializer, EmailLoginTokenObtainPairSerializer
 
 class RegisterAPIView(CreateAPIView):
     serializer_class = RegisterSerializer
@@ -49,7 +49,7 @@ class LoginTokenObtainPairView(TokenObtainPairView):
     """
 
     permission_classes = [AllowAny]
-    serializer_class = EmailTokenObtainPairSerializer
+    serializer_class = EmailLoginTokenObtainPairSerializer
     
     def post(self, request, *args, **kwargs):
         """Authenticate the user and return tokens as cookies."""
