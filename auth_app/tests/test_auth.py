@@ -212,8 +212,7 @@ class LogoutTests(APITestCase):
         self.username = 'test_user'
         self.password = 'test1234'
         self.email = 'test@web.de'
-        self.User = get_user_model()
-        self.user = self.User.objects.create_user(username=self.username, password=self.password, email=self.email)
+        self.user = User.objects.create_user(username=self.username, password=self.password, email=self.email)
         self.login_url = reverse('login')
         self.logout_url = reverse('logout')
 
@@ -233,3 +232,22 @@ class LogoutTests(APITestCase):
         response = self.client.post(self.logout_url, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class PasswordResetTests(APITestCase):
+    def setUp(self):
+        self.username = 'test_user'
+        self.password = 'test1234'
+        self.email = 'test@web.de'
+        self.user = User.objects.create_user(username=self.username, password=self.password, email=self.email)
+        self.login_url = reverse('login')
+        self.password_reset_url = reverse('password_reset')
+
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+    def test_post_success(self):
+        data = {
+            'email': self.email
+        }
+
+        self.client.post(self.login_url, {'email': self.email, 'password': self.password}, format='json')
+        response = self.client.post(self.password_reset_url, data, format='json')
