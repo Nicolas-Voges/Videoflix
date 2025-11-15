@@ -203,3 +203,33 @@ class TokenRefreshTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.data['detail'], 'Invalid refresh token.')
+
+
+class LogoutTests(APITestCase):
+    """Tests for logout and token blacklisting endpoint."""
+
+    def setUp(self):
+        self.username = 'test_user'
+        self.password = 'test1234'
+        self.email = 'test@web.de'
+        self.User = get_user_model()
+        self.user = self.User.objects.create_user(username=self.username, password=self.password, email=self.email)
+        self.login_url = reverse('login')
+        self.logout_url = reverse('logout')
+
+
+    def test_post_success(self):
+        """A logged-in client is logged out and cookies are cleared."""
+        self.client.post(self.login_url, {'email': self.email, 'password': self.password}, format='json')
+
+        response = self.client.post(self.logout_url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.cookies['access_token'].value, '')
+        self.assertEqual(response.cookies['refresh_token'].value, '')
+
+
+    def test_post_fails_no_cookie(self):
+        response = self.client.post(self.logout_url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
