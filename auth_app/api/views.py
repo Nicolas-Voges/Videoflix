@@ -13,6 +13,7 @@ from rest_framework_simplejwt.views import (
     TokenBlacklistView,
 )
 from rest_framework.exceptions import PermissionDenied, AuthenticationFailed
+from rest_framework import status
 
 from auth_app.api.serializers import RegisterSerializer, EmailLoginTokenObtainPairSerializer
 
@@ -88,5 +89,49 @@ class LoginTokenObtainPairView(TokenObtainPairView):
                 'email': user.email
             }
         }
+
+        return response
+    
+
+class AccessTokenRefreshView(TokenRefreshView):
+    """Refresh the access token using the refresh token stored in a cookie.
+
+    The view reads the refresh token from the cookie ``refresh_token`` and
+    returns a new access token in the response body and as an
+    HttpOnly cookie. If the cookie is missing or invalid, the view
+    returns HTTP 401.
+    """
+
+    def post(self, request, *args, **kwargs):
+        """Handle POST to refresh the access token."""
+        refresh_token = request.COOKIES.get('refresh_token')
+
+        if refresh_token is None:
+            return Response(
+                {'detail': 'Refresh token not provided.'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        serializer = self.get_serializer(data={'refresh': refresh_token})
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except Exception:
+            return Response(
+                {'detail': 'Invalid refresh token.'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        access_token = serializer.validated_data.get('access')
+
+        response = Response({'detail': "Token refreshed", 'access': access_token}, status=status.HTTP_200_OK)
+
+        response.set_cookie(
+            key='access_token',
+            value=access_token,
+            httponly=True,
+            secure=True,
+            samesite='Lax'
+        )
 
         return response

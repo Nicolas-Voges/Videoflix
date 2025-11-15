@@ -173,7 +173,7 @@ class TokenRefreshTests(APITestCase):
         self.username = 'test_user'
         self.password = 'test1234'
         self.user = User.objects.create_user(username=self.username, password=self.password)
-        self.login_url = reverse('token_obtain_pair')
+        self.login_url = reverse('login')
         self.refresh_url = reverse('token_refresh')
 
 
