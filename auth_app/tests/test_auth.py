@@ -172,14 +172,15 @@ class TokenRefreshTests(APITestCase):
     def setUp(self):
         self.username = 'test_user'
         self.password = 'test1234'
-        self.user = User.objects.create_user(username=self.username, password=self.password)
+        self.email = 'test@web.de'
+        self.user = User.objects.create_user(username=self.username, password=self.password, email=self.email)
         self.login_url = reverse('login')
         self.refresh_url = reverse('token_refresh')
 
 
     def test_post_success(self):
         """A logged-in client can refresh the access token successfully."""
-        self.client.post(self.login_url, {'username': self.username, 'password': self.password}, format='json')
+        self.client.post(self.login_url, {'email': self.email, 'password': self.password}, format='json')
 
         response = self.client.post(self.refresh_url, format='json')
 
