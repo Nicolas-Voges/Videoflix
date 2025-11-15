@@ -152,15 +152,53 @@ class LoginTests(APITestCase):
 
     def test_post_fails(self):
         cases = [
-            ("wrong_password", {'email': self.email_active, 'password': 'wrong_password'}, status.HTTP_400_BAD_REQUEST),
-            ("wrong_email", {'email': 'wrong@wro.ng', 'password': self.password}, status.HTTP_400_BAD_REQUEST),
-            ("not_active_user", {'email': self.email_not_active, 'password': self.password}, status.HTTP_400_BAD_REQUEST)
+            ("wrong_password", {'email': self.email_active, 'password': 'wrong_password'}),
+            ("wrong_email", {'email': 'wrong@wro.ng', 'password': self.password}),
+            ("not_active_user", {'email': self.email_not_active, 'password': self.password})
         ]
         
-        for message, data, _status in cases:
+        for message, data in cases:
             with self.subTest(test_case=message):
                 response = self.client.post(self.url, data, format='json')
 
-                self.assertEqual(response.status_code, _status)
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
                 self.assertNotIn('access_token', response.cookies)
                 self.assertNotIn('refresh_token', response.cookies)
+
+
+class TokenRefreshTests(APITestCase):
+    """Tests for refreshing the access token using the refresh cookie."""
+
+    def setUp(self):
+        self.username = 'test_user'
+        self.password = 'test1234'
+        self.user = User.objects.create_user(username=self.username, password=self.password)
+        self.login_url = reverse('token_obtain_pair')
+        self.refresh_url = reverse('token_refresh')
+
+
+    def test_post_success(self):
+        """A logged-in client can refresh the access token successfully."""
+        self.client.post(self.login_url, {'username': self.username, 'password': self.password}, format='json')
+
+        response = self.client.post(self.refresh_url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('access', response.data)
+
+
+    def test_post_fails_no_cookie(self):
+        """If no refresh cookie is present, the view returns 401."""
+        response = self.client.post(self.refresh_url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.data['detail'], 'Refresh token not provided.')
+
+
+    def test_post_fails_invalid_token(self):
+        """An invalid refresh cookie yields an unauthorized response."""
+        self.client.cookies['refresh_token'] = 'invalid_token'
+        response = self.client.post(self.refresh_url, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.data['detail'], 'Invalid refresh token.')
