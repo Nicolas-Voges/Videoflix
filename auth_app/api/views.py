@@ -14,6 +14,8 @@ from rest_framework_simplejwt.views import (
 )
 from rest_framework.exceptions import PermissionDenied, AuthenticationFailed
 from rest_framework import status
+from rest_framework_simplejwt.serializers import TokenBlacklistSerializer
+from rest_framework.exceptions import AuthenticationFailed
 
 from auth_app.api.serializers import RegisterSerializer, EmailLoginTokenObtainPairSerializer
 
@@ -134,4 +136,37 @@ class AccessTokenRefreshView(TokenRefreshView):
             samesite='Lax'
         )
 
+        return response
+    
+
+class LogoutTokenBlacklistView(TokenBlacklistView):
+    """Blacklist the refresh token stored in the cookie and clear cookies.
+
+    This view overrides the serializer construction to pull the refresh
+    token from the request cookies. After delegating to the parent
+    class to blacklist the token, it deletes the token cookies and
+    returns a friendly success message.
+    """
+
+    def get_serializer(self, *args, **kwargs):
+        """Return a TokenBlacklistSerializer populated with the cookie token.
+
+        Raises AuthenticationFailed if no refresh token cookie is present.
+        """
+        refresh_token = self.request.COOKIES.get('refresh_token')
+        if refresh_token is None:
+            raise AuthenticationFailed("Not authenticated.")
+        kwargs['data'] = {'refresh': refresh_token}
+        return TokenBlacklistSerializer(*args, **kwargs)
+
+
+    def post(self, request, *args, **kwargs):
+        """Blacklist the refresh token and clear auth cookies.
+
+        Returns a 200 response with a confirmation message.
+        """
+        response = super().post(request, *args, **kwargs)
+        response.delete_cookie('access_token')
+        response.delete_cookie('refresh_token')
+        response.data = {'detail': "Log-Out successfully! All Tokens will be deleted. Refresh token is now invalid."}
         return response
