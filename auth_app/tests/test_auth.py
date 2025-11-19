@@ -260,9 +260,17 @@ class PasswordResetTests(APITestCase):
 
     def test_post_fails(self):
         data = {
-            'email': "not_existing@email.de"
+            'email': ""
         }
 
         response = self.client.post(self.url, data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+    def test_post_non_existent_email(self):
+        data = {
+            'email': "not_existing@email.de"
+        }
+        response = self.client.post(self.url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
