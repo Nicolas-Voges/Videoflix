@@ -2,7 +2,6 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth import get_user_model
 
-from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework.response import Response
 from rest_framework.generics import CreateAPIView
 from rest_framework.views import APIView
@@ -12,10 +11,14 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenBlacklistView,
 )
-from rest_framework.exceptions import PermissionDenied, AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework import status
 from rest_framework_simplejwt.serializers import TokenBlacklistSerializer
 from rest_framework.exceptions import AuthenticationFailed
+
+from auth_app.api.serializers import RegisterSerializer, EmailLoginTokenObtainPairSerializer,\
+PasswordResetSerializer
+from auth_app.utils import send_mail, create_uidb64_and_token
 
 from auth_app.api.serializers import RegisterSerializer, EmailLoginTokenObtainPairSerializer
 
@@ -170,3 +173,32 @@ class LogoutTokenBlacklistView(TokenBlacklistView):
         response.delete_cookie('refresh_token')
         response.data = {'detail': "Log-Out successfully! All Tokens will be deleted. Refresh token is now invalid."}
         return response
+    
+class PasswordResetAPIView(APIView):
+    permission_classes = [AllowAny]
+    serializer_class = PasswordResetSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data["email"]
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"detail": "An email has been sent to reset your password."}, status=status.HTTP_200_OK)
+        
+        uidb64, token = create_uidb64_and_token(user)
+
+        send_mail(
+            uidb64=uidb64,
+            token=token,
+            instance=user,
+            content_type="reset_password"
+        )
+
+        return Response(
+            {"detail": "Password reset email sent."},
+            status=status.HTTP_200_OK
+        )
