@@ -120,3 +120,16 @@ class EmailLoginTokenObtainPairSerializer(TokenObtainPairSerializer):
         
         data = super().validate({'username': user.username, 'password': password})
         return data
+    
+
+class PasswordResetSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField()
+
+    class Meta:
+        model = User
+        fields = ['email']
+
+    def validate_email(self, value):
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError({'detail': "Wrong email address"})
+        return value
