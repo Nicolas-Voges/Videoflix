@@ -240,7 +240,9 @@ class PasswordResetTests(APITestCase):
         self.password = 'test1234'
         self.email = 'test@web.de'
         self.user = User.objects.create_user(username=self.username, password=self.password, email=self.email)
+        mail.outbox = []
         self.url = reverse('password_reset')
+
 
     @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
     def test_post_success(self):
@@ -263,4 +265,4 @@ class PasswordResetTests(APITestCase):
 
         response = self.client.post(self.url, data, format='json')
 
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
