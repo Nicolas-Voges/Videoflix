@@ -173,7 +173,8 @@ class LogoutTokenBlacklistView(TokenBlacklistView):
         response.delete_cookie('refresh_token')
         response.data = {'detail': "Log-Out successfully! All Tokens will be deleted. Refresh token is now invalid."}
         return response
-    
+
+
 class PasswordResetAPIView(APIView):
     permission_classes = [AllowAny]
     serializer_class = PasswordResetSerializer
