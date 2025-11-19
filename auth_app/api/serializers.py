@@ -128,8 +128,3 @@ class PasswordResetSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['email']
-
-    def validate_email(self, value):
-        if not User.objects.filter(email=value).exists():
-            raise serializers.ValidationError({'detail': "Wrong email address"})
-        return value
