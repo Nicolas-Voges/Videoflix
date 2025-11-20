@@ -274,3 +274,40 @@ class PasswordResetTests(APITestCase):
         }
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+class PasswordResetConfirmTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="TestUser",
+            password="Test123$",
+            email='test@test.de'
+        )
+        self.uidb64 = urlsafe_base64_encode(str(self.user.pk).encode('utf-8'))
+        self.token = default_token_generator.make_token(self.user)
+        self.new_password = "NewTest123$"
+        self.url = reverse('password_confirm', kwargs={"uidb64": self.uidb64, "token": self.token})
+        self.data = {
+            'new_password': self.new_password,
+            'confirm_password': self.new_password
+        }
+
+
+    def test_post_success(self):
+        response = self.client.post(self.url, self.data, format='json')
+
+        self.user.refresh_from_db()
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(self.user.check_password(self.new_password))
+
+
+    def test_post_fails(self):
+        data= {
+            'new_password': self.new_password,
+            'confirm_password': "wrong123$"
+        }
+        
+        response = self.client.post(self.url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
