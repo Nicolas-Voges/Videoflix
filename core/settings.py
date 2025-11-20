@@ -36,11 +36,18 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(
 
 CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", default="http://localhost:4200").split(",")
 
+# Email configuration
+
+# Has only effect in development mode (DEBUG=True). See how to be able to see the email design
+# in the README.md file (https://github.com/Nicolas-Voges/Videoflix).
+ADJUST_EMAIL_DESIGN = os.environ.get("ADJUST_EMAIL_DESIGN", default="False") == "True"
 
 if DEBUG:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-    # EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-    # EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
+    if ADJUST_EMAIL_DESIGN:
+        EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+        EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
+    else:
+        EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = os.environ.get("EMAIL_HOST", default="smtp.example.com")
