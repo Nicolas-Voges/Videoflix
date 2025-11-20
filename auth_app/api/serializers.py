@@ -21,7 +21,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'confirmed_password']
+        fields = ['email', 'password', 'confirmed_password']
 
         extra_kwargs = {
             'password': {
@@ -46,26 +46,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError('Email already exists')
         return value
-    
-
-    def validate(self, data):
-        """
-        Ensure the username derived from the email is unique.
-
-        Raises:
-            serializers.ValidationError: If the username already exists.
-
-        Returns:
-            dict: The validated data.
-        """
-        email = data.get('email')
-        username = re.sub(r'[^.\w@+-]', '_', email)
-
-        if User.objects.filter(username=username).exists():
-            raise serializers.ValidationError(
-                {"username": "Dieser Benutzername existiert bereits."}
-            )
-        return data
 
 
     def create(self, validated_data):
@@ -98,9 +78,7 @@ class EmailLoginTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        if 'username' in self.fields:
-            self.fields.pop('username')
+        self.fields.pop('username', None)
 
 
     def validate(self, attrs):
@@ -110,21 +88,15 @@ class EmailLoginTokenObtainPairSerializer(TokenObtainPairSerializer):
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            raise serializers.ValidationError("Invalid email or password")
+            raise serializers.ValidationError("Invalid email or password or your account is not active!")
         
         if not user.check_password(password):
-            raise serializers.ValidationError("Invalid email or password")
+            raise serializers.ValidationError("Invalid email or password or your account is not active!")
         
         if not user.is_active:
-            raise serializers.ValidationError("Confirm your email address to activate your account!")
+            raise serializers.ValidationError("Invalid email or password or your account is not active!")
         
-        data = super().validate({'username': user.username, 'password': password})
-        return data
-    
-
-class PasswordResetSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField()
-
-    class Meta:
-        model = User
-        fields = ['email']
+        return super().validate({
+            'username': user.username,
+            'password': password
+        })
