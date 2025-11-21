@@ -7,11 +7,11 @@ from content_app.models import Video
 
 User = get_user_model()
 
-class ContentListTests(APITestCase):
+class VideoListTests(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='Test123$', email='testuser@example.com')
-        self.client.login(username='testuser', password='Test123$')
-        self.url = reverse('content-list')
+        self.url = reverse('video-list')
+        self.login_url = reverse('login')
         self.expected_fields = {'id', 'created_at', 'title', 'description', 'thumbnail_url', 'category'}
         self.video = Video.objects.create(
             title="Sample Video",
@@ -22,6 +22,7 @@ class ContentListTests(APITestCase):
 
 
     def test_get_content_list_success(self):
+        self.client.post(self.login_url, data={'email': 'testuser@example.com', 'password': 'Test123$'})
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response.data, list)
