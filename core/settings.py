@@ -69,7 +69,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'auth_app.apps.AuthAppConfig',
-    'content_app',
+    'content_app.apps.ContentAppConfig',
     'whitenoise.runserver_nostatic',
     'django_redis',
     'django_rq'
