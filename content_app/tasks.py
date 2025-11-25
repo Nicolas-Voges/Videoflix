@@ -1,5 +1,5 @@
 from .models import Video
-from .ffmpeg_commands import generate_hls_files
+from .utils import generate_hls_files
 
 
 def transcode_video(video_id):
