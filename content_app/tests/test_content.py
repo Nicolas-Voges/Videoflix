@@ -1,5 +1,10 @@
+from unittest.mock import patch
+
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+
 from rest_framework.test import APITestCase
 from rest_framework import status
 
@@ -17,7 +22,9 @@ class VideoListTests(APITestCase):
             title="Sample Video",
             description="This is a sample video description.",
             thumbnail_url="http://example.com/thumbnail.jpg",
-            category="Sample Category"
+            category="Sample Category",
+            original_file="videos/originals/test.mp4",
+            status="pending"
         )
 
 
