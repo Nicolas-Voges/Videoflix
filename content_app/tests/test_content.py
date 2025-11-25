@@ -43,3 +43,26 @@ class VideoListTests(APITestCase):
         self.client.logout()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class VideoUploadTests(TestCase):
+
+    @patch("content_app.signals.start_transcoding_job")  
+    def test_admin_upload_triggers_transcoding(self, mock_job):
+        fake_video = SimpleUploadedFile(
+            name="test.mp4",
+            content=b"\x00" * 1024,
+            content_type="video/mp4"
+        )
+
+        video = Video.objects.create(
+            title="Test Video",
+            description="Test description",
+            thumbnail_url="https://example.com/thumb.jpg",
+            category="Test",
+            original_file=fake_video,
+        )
+
+        self.assertIsNotNone(video.id)
+        self.assertTrue(video.original_file.name.endswith("test.mp4"))
+        mock_job.assert_called_once_with(video)
