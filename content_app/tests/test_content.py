@@ -9,6 +9,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from content_app.models import Video
+from content_app.tasks import transcode_video
 
 User = get_user_model()
 
@@ -47,8 +48,9 @@ class VideoListTests(APITestCase):
 
 class VideoUploadTests(TestCase):
 
-    @patch("content_app.signals.start_transcoding_job")  
+    @patch("content_app.signals.django_rq.get_queue")  
     def test_admin_upload_triggers_transcoding(self, mock_job):
+        mock_queue = mock_job.return_value
         fake_video = SimpleUploadedFile(
             name="test.mp4",
             content=b"\x00" * 1024,
@@ -64,5 +66,6 @@ class VideoUploadTests(TestCase):
         )
 
         self.assertIsNotNone(video.id)
-        self.assertTrue(video.original_file.name.endswith("test.mp4"))
-        mock_job.assert_called_once_with(video)
+        mock_queue.enqueue.assert_called_once_with(transcode_video, video.id)
+        self.assertIn("test", video.original_file.name)
+        self.assertTrue(video.original_file.name.endswith(".mp4"))
