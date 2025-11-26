@@ -21,3 +21,11 @@ def video_playlist_view(request, movie_id: int, resolution: str):
         raise Http404("Playlist not found")
 
     return FileResponse(open(playlist_path, "rb"), content_type="application/vnd.apple.mpegurl")
+
+
+def video_segment_view(request, movie_id: int, resolution: str, segment: str):
+    segment_path = Path(settings.MEDIA_ROOT) / f"videos/{movie_id}/{resolution}/{segment}"
+    if not segment_path.exists():
+        raise Http404("Segment not found")
+
+    return FileResponse(open(segment_path, "rb"), content_type="video/mp2t")
