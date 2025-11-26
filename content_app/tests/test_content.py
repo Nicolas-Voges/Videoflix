@@ -1,5 +1,7 @@
 from unittest.mock import patch
+from pathlib import Path
 
+from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
@@ -69,3 +71,48 @@ class VideoUploadTests(TestCase):
         mock_queue.enqueue.assert_called_once_with(transcode_video, video.id)
         self.assertIn("test", video.original_file.name)
         self.assertTrue(video.original_file.name.endswith(".mp4"))
+
+
+class VideoStreamingTests(TestCase):
+    def setUp(self):
+        self.movie_id = 1
+        self.resolution = "720p"
+
+        self.base = Path(settings.MEDIA_ROOT) / f"videos/{self.movie_id}/{self.resolution}"
+        self.base.mkdir(parents=True, exist_ok=True)
+
+        self.playlist = self.base / "index.m3u8"
+        self.playlist.write_text("#EXTM3U")
+
+        self.segment = self.base / "seg1.ts"
+        self.segment.write_bytes(b"fake-ts-data")
+
+
+    def test_playlist_returns_file(self):
+        url = reverse("video-playlist", args=[self.movie_id, self.resolution])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/vnd.apple.mpegurl")
+
+
+    def test_playlist_missing_returns_404(self):
+        url = reverse("video-playlist", args=[99999, "720p"])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+
+    def test_segment_returns_file(self):
+        url = reverse("video-segment",
+                      args=[self.movie_id, self.resolution, "seg1.ts"])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "video/mp2t")
+
+
+    def test_segment_missing_returns_404(self):
+        url = reverse("video-segment",
+                      args=[1, "720p", "missing.ts"])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
