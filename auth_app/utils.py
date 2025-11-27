@@ -31,4 +31,3 @@ def send_mail(uidb64, token, instance, content_type):
     msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
     msg.attach_alternative(html_content, "text/html")
     msg.send()
-    print(f"Sent {content_type} email to {to}")

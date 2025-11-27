@@ -150,16 +150,32 @@ Navigate to `http://localhost:8000/admin` and log in with your superuser credent
 
 ### Environment Variables
 
-Create a `.env` file in the project root with the following variables:
-### Environment Variables
-
 Copy the `.env.template` file to `.env` and update the values according to your setup:
 
 ```bash
 cp .env.template .env
 ```
 
-All required environment variables are documented in the `.env.template` file with helpful comments.
+| Variable | Description |
+|----------|-------------|
+| `DEBUG` | Enable/disable Django debug mode (set to `False` in production) |
+| `SECRET_KEY` | Django secret key for cryptographic operations |
+| `ALLOWED_HOSTS` | Comma-separated list of allowed host addresses |
+| `DATABASE_URL` | PostgreSQL database connection string |
+| `REDIS_URL` | Redis connection URL for task queue and caching |
+| `USE_EMAIL_FILE_BACKEND` | Set to `True` to save emails locally instead of sending them |
+| `EMAIL_HOST` | SMTP server for sending emails |
+| `EMAIL_PORT` | SMTP port (typically 587 or 465) |
+| `EMAIL_HOST_USER` | SMTP authentication username |
+| `EMAIL_HOST_PASSWORD` | SMTP authentication password |
+| `EMAIL_USE_TLS` | Enable TLS encryption for SMTP |
+| `DEFAULT_FROM_EMAIL` | Sender email address for application emails |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated list of allowed frontend origins |
+| `JWT_SECRET_KEY` | Secret key for JWT token signing |
+| `JWT_ALGORITHM` | Algorithm for JWT token encoding (default: HS256) |
+| `FFMPEG_PATH` | Path to FFmpeg executable |
+| `MEDIA_ROOT` | Directory for uploaded video files |
+| `STATIC_ROOT` | Directory for static files |
 
 
 ---
@@ -276,7 +292,7 @@ These templates are rendered with context variables for the user and activation/
 ---
 
 ## Development Tips
-
+- If your `SECRET_KEY` contains  `$` characters, escape them as `$$` in the `.env` file
 - Monitor background jobs: `docker compose logs web`
 - Test email functionality: Check `sent_emails/` folder in development mode (requires `USE_EMAIL_FILE_BACKEND` set to `True` in `.env`).
 Rename the `.log` file to `.eml` to open it directly in email clients like Outlook to verify email design and formatting.
