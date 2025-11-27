@@ -158,24 +158,31 @@ cp .env.template .env
 
 | Variable | Description |
 |----------|-------------|
-| `DEBUG` | Enable/disable Django debug mode (set to `False` in production) |
+| `DJANGO_SUPERUSER_USERNAME` | Default superuser username |
+| `DJANGO_SUPERUSER_PASSWORD` | Default superuser password |
+| `DJANGO_SUPERUSER_EMAIL` | Default superuser email address |
 | `SECRET_KEY` | Django secret key for cryptographic operations |
+| `DEBUG` | Enable/disable Django debug mode (set to `False` in production) |
 | `ALLOWED_HOSTS` | Comma-separated list of allowed host addresses |
-| `DATABASE_URL` | PostgreSQL database connection string |
-| `REDIS_URL` | Redis connection URL for task queue and caching |
-| `USE_EMAIL_FILE_BACKEND` | Set to `True` to save emails locally instead of sending them |
+| `CSRF_TRUSTED_ORIGINS` | Comma-separated list of trusted origins for CSRF protection |
+| `DB_NAME` | PostgreSQL database name |
+| `DB_USER` | PostgreSQL database user |
+| `DB_PASSWORD` | PostgreSQL database password |
+| `DB_HOST` | PostgreSQL host address |
+| `DB_PORT` | PostgreSQL port number |
+| `REDIS_HOST` | Redis server hostname |
+| `REDIS_LOCATION` | Redis connection URL for caching |
+| `REDIS_PORT` | Redis port number |
+| `REDIS_DB` | Redis database number |
 | `EMAIL_HOST` | SMTP server for sending emails |
 | `EMAIL_PORT` | SMTP port (typically 587 or 465) |
 | `EMAIL_HOST_USER` | SMTP authentication username |
 | `EMAIL_HOST_PASSWORD` | SMTP authentication password |
 | `EMAIL_USE_TLS` | Enable TLS encryption for SMTP |
+| `EMAIL_USE_SSL` | Enable SSL encryption for SMTP |
 | `DEFAULT_FROM_EMAIL` | Sender email address for application emails |
-| `CORS_ALLOWED_ORIGINS` | Comma-separated list of allowed frontend origins |
-| `JWT_SECRET_KEY` | Secret key for JWT token signing |
-| `JWT_ALGORITHM` | Algorithm for JWT token encoding (default: HS256) |
-| `FFMPEG_PATH` | Path to FFmpeg executable |
-| `MEDIA_ROOT` | Directory for uploaded video files |
-| `STATIC_ROOT` | Directory for static files |
+| `USE_EMAIL_FILE_BACKEND` | Set to `True` to save emails locally instead of sending them (DEBUG must be True) |
+| `FRONTEND_BASE_URL` | Base URL for frontend application |
 
 
 ---
