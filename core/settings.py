@@ -40,10 +40,10 @@ CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", default="http://lo
 
 # Has only effect in development mode (DEBUG=True). See how to be able to see the email design
 # in the README.md file (https://github.com/Nicolas-Voges/Videoflix).
-ADJUST_EMAIL_DESIGN = os.environ.get("ADJUST_EMAIL_DESIGN", default="False") == "True"
+USE_EMAIL_FILE_BACKEND = os.environ.get("USE_EMAIL_FILE_BACKEND", default="False") == "True"
 
 if DEBUG:
-    if ADJUST_EMAIL_DESIGN:
+    if USE_EMAIL_FILE_BACKEND:
         EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
         EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
     else:

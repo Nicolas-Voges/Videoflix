@@ -45,4 +45,5 @@ staticfiles/
 media/
 
 # Email files for development
-sent_emails/
+sent_emails/*.log
+sent_emails/*.eml

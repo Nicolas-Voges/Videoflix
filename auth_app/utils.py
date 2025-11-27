@@ -31,8 +31,4 @@ def send_mail(uidb64, token, instance, content_type):
     msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
     msg.attach_alternative(html_content, "text/html")
     msg.send()
-
-
-# from django.contrib.auth import get_user_model
-# User = get_user_model()
-# user = User.objects.create_user(username="Nico", email="nicolas.voges@hotmail.com", password="Test123$")
+    print(f"Sent {content_type} email to {to}")
