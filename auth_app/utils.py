@@ -5,7 +5,8 @@ from django.utils.http import urlsafe_base64_encode
 
 
 def get_content(uidb64, token, instance, content_type):
-    html_content = render_to_string(f"emails/{content_type}.html", {"user": instance, "activation_link": f"http://127.0.0.1:8000/api/activate/{uidb64}/{token}/"})
+    html_content = render_to_string(f"emails/{content_type}.html", {"user": instance, "activation_link": f"http://127.0.0.1:5500/pages/auth/activate.html/?uid={uidb64}&token={token}"})
+    # html_content = render_to_string(f"emails/{content_type}.html", {"user": instance, "activation_link": f"http://127.0.0.1:8000/api/activate/{uidb64}/{token}/"})
     match content_type:
         case 'activate_account':
             subject = "Confirm your email"
@@ -30,3 +31,8 @@ def send_mail(uidb64, token, instance, content_type):
     msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
     msg.attach_alternative(html_content, "text/html")
     msg.send()
+
+
+# from django.contrib.auth import get_user_model
+# User = get_user_model()
+# user = User.objects.create_user(username="Nico", email="nicolas.voges@hotmail.com", password="Test123$")
