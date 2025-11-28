@@ -3,6 +3,14 @@ from .utils import generate_hls_files
 
 
 def transcode_video(video_id):
+    """
+    Transcode a video to HLS format and update its processing status.
+
+    This function is intended to run as a background task using RQ.
+
+    Raises:
+        Exception: Any exception raised during HLS generation is propagated.
+    """
     video = Video.objects.get(id=video_id)
     video.status = "processing"
     video.save()

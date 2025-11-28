@@ -1,6 +1,8 @@
 from django.db import models
 
 class StatusType(models.TextChoices):   
+    """ Enumeration of possible processing statuses for videos. """
+    
     pending = 'pending', 'pending'
     processing = 'processing', 'processing'
     ready = 'ready', 'ready'
