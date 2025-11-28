@@ -1,20 +1,43 @@
-"""Serializers for authentication-related API endpoints.
+"""
+Serializers for authentication-related API endpoints.
 
-This module provides a serializer for user registration used by the
-registration API. It performs basic validation and creates a new
-User instance when saved.
+This module contains serializers that handle user registration,
+email-based authentication using JWT, and password reset functionality.
+
+Classes:
+    RegisterSerializer:
+        Handles user registration, including email uniqueness validation
+        and password confirmation checks. A unique username is derived
+        from the user's email.
+
+    EmailLoginTokenObtainPairSerializer:
+        Extends TokenObtainPairSerializer to authenticate using an email
+        instead of a username.
+
+    PasswordResetSerializer:
+        Validates the email during a password reset request.
+
+    PasswordResetConfirmSerializer:
+        Validates new password input including confirmation matching.
 """
 
 import re
-from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 from django.contrib.auth.models import User
 
-class RegisterSerializer(serializers.ModelSerializer):
-    """Serializer used to register a new user.
+from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-    Validation ensures that the password and confirmed_password match
-    and that the email address is unique among existing users.
+class RegisterSerializer(serializers.ModelSerializer):
+    """
+    Serializer used to register a new user.
+
+    This serializer ensures:
+    - The password matches the confirmed_password field.
+    - The provided email is unique in the User database.
+
+    A unique username is automatically generated from the email address.
+    The created user is initially set to inactive until verification.
     """
     
     confirmed_password = serializers.CharField(write_only=True)
@@ -55,6 +78,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         Returns:
             User: The newly created user instance.
         """
+        
         validated_data.pop('confirmed_password')
         email = validated_data['email']
         base_username = re.sub(r'[^.\w@+-]', '_', email)
@@ -73,15 +97,21 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class EmailLoginTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """
+    Authenticate users via email instead of username.
+    """
+
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
     def __init__(self, *args, **kwargs):
+        """Remove username field from serializer."""
         super().__init__(*args, **kwargs)
         self.fields.pop('username', None)
 
 
     def validate(self, attrs):
+        """Validate email, password and active status."""
         email = attrs.get('email')
         password = attrs.get('password')
 
@@ -103,10 +133,12 @@ class EmailLoginTokenObtainPairSerializer(TokenObtainPairSerializer):
     
 
 class PasswordResetSerializer(serializers.Serializer):
+    """Validate email for password reset request."""
     email = serializers.EmailField()
 
 
 class PasswordResetConfirmSerializer(serializers.Serializer):
+    """Ensure new password and confirmation match."""
     new_password = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True)
 

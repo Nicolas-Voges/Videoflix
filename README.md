@@ -301,7 +301,7 @@ These templates are rendered with context variables for the user and activation/
 ## Development Tips
 - If your `SECRET_KEY` contains  `$` characters, escape them as `$$` in the `.env` file
 - Monitor background jobs: `docker compose logs web`
-- Test email functionality: Check `sent_emails/` folder in development mode (requires `USE_EMAIL_FILE_BACKEND` set to `True` in `.env`).
+- Test email functionality: Check `sent_emails/` folder in development mode (requires `USE_EMAIL_FILE_BACKEND` and `DEBUG` set to `True` in `.env`).
 Rename the `.log` file to `.eml` to open it directly in email clients like Outlook to verify email design and formatting.
 
 ---
