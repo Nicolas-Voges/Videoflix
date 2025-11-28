@@ -36,6 +36,8 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(
 
 CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", default="http://localhost:4200").split(",")
 
+FRONTEND_URL = os.environ.get("FRONTEND_URL", default="http://localhost:5500")
+
 # Email configuration
 
 # Has only effect in development mode (DEBUG=True). See how to be able to see the email design
