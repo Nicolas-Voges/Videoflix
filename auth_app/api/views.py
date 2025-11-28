@@ -1,3 +1,13 @@
+"""
+Views for API endpoints related to authentication.
+
+This module provides:
+- Registration and account activation
+- Email-based login using JWT
+- Token refresh and logout
+- Password reset request and confirmation
+"""
+
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth import get_user_model
@@ -21,13 +31,22 @@ from auth_app.api.serializers import PasswordResetConfirmSerializer, RegisterSer
 from auth_app.utils import send_mail, create_uidb64_and_token
 
 class RegisterAPIView(CreateAPIView):
+    """"Register a new user and trigger activation email."""
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
 
 
 User = get_user_model()
 class ActivationAPIView(APIView):
+    """Activate a user account using uidb64 and token."""
+
     def get(self, request, uidb64, token):
+        """
+        Validate activation token and activate the user.
+        Returns:
+            - 200 if successfully activated
+            - 400 for invalid activation data
+        """
         try:
             uid = urlsafe_base64_decode(uidb64).decode()
             user = User.objects.get(pk=uid)
@@ -45,18 +64,23 @@ class ActivationAPIView(APIView):
         
 
 class LoginTokenObtainPairView(TokenObtainPairView):
-    """Obtain JWT tokens and set them as HttpOnly cookies.
-
-    On successful authentication the view sets two cookies
-    (``access_token`` and ``refresh_token``) and returns a JSON object
-    with a success message and basic user information.
+    """
+    Authenticate a user using email and set JWT tokens as HttpOnly cookies.
+    
+    Response includes:
+    - user info (id, username, email)
+    - access & refresh token as secure HttpOnly cookies
     """
 
     permission_classes = [AllowAny]
     serializer_class = EmailLoginTokenObtainPairSerializer
     
     def post(self, request, *args, **kwargs):
-        """Authenticate the user and return tokens as cookies."""
+        """
+        Validate credentials and issue JWT cookies.
+        Errors:
+            - 401 if authentication fails (handled by serializer)
+        """
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -97,33 +121,27 @@ class LoginTokenObtainPairView(TokenObtainPairView):
     
 
 class AccessTokenRefreshView(TokenRefreshView):
-    """Refresh the access token using the refresh token stored in a cookie.
-
-    The view reads the refresh token from the cookie ``refresh_token`` and
-    returns a new access token in the response body and as an
-    HttpOnly cookie. If the cookie is missing or invalid, the view
-    returns HTTP 401.
+    """
+    Refresh the access token using the HttpOnly refresh token cookie.
+    Returns:
+        - New access token
+    Errors:
+        - 401 if refresh token missing or invalid
     """
 
     def post(self, request, *args, **kwargs):
-        """Handle POST to refresh the access token."""
+        """Get refresh token from cookie, validate it, set new access cookie."""
         refresh_token = request.COOKIES.get('refresh_token')
 
         if refresh_token is None:
-            return Response(
-                {'detail': 'Refresh token not provided.'},
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-
+            return Response({'detail': 'Refresh token not provided.'}, status=status.HTTP_401_UNAUTHORIZED)
+        
         serializer = self.get_serializer(data={'refresh': refresh_token})
 
         try:
             serializer.is_valid(raise_exception=True)
         except Exception:
-            return Response(
-                {'detail': 'Invalid refresh token.'},
-                status=status.HTTP_401_UNAUTHORIZED
-            )
+            return Response({'detail': 'Invalid refresh token.'}, status=status.HTTP_401_UNAUTHORIZED)
 
         access_token = serializer.validated_data.get('access')
 
@@ -141,19 +159,13 @@ class AccessTokenRefreshView(TokenRefreshView):
     
 
 class LogoutTokenBlacklistView(TokenBlacklistView):
-    """Blacklist the refresh token stored in the cookie and clear cookies.
-
-    This view overrides the serializer construction to pull the refresh
-    token from the request cookies. After delegating to the parent
-    class to blacklist the token, it deletes the token cookies and
-    returns a friendly success message.
+    """
+    Log out the user by blacklisting the current refresh token.
+    Removes cookies and prevents further authenticated access.
     """
 
     def get_serializer(self, *args, **kwargs):
-        """Return a TokenBlacklistSerializer populated with the cookie token.
-
-        Raises AuthenticationFailed if no refresh token cookie is present.
-        """
+        """Provide refresh token from cookie for blacklisting or raise error if missing."""
         refresh_token = self.request.COOKIES.get('refresh_token')
         if refresh_token is None:
             raise AuthenticationFailed("Not authenticated.")
@@ -162,10 +174,7 @@ class LogoutTokenBlacklistView(TokenBlacklistView):
 
 
     def post(self, request, *args, **kwargs):
-        """Blacklist the refresh token and clear auth cookies.
-
-        Returns a 200 response with a confirmation message.
-        """
+        """Blacklist token and clear both auth cookies."""
         response = super().post(request, *args, **kwargs)
         response.delete_cookie('access_token')
         response.delete_cookie('refresh_token')
@@ -174,10 +183,15 @@ class LogoutTokenBlacklistView(TokenBlacklistView):
 
 
 class PasswordResetAPIView(APIView):
+    """
+    Initiate password reset by sending email with secure token.
+    Always returns success to prevent email enumeration.
+    """
     permission_classes = [AllowAny]
     serializer_class = PasswordResetSerializer
 
     def post(self, request, *args, **kwargs):
+        """Send password reset email if account exists."""
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -197,17 +211,22 @@ class PasswordResetAPIView(APIView):
             content_type="reset_password"
         )
 
-        return Response(
-            {"detail": "Password reset email sent."},
-            status=status.HTTP_200_OK
-        )
+        return Response({"detail": "Password reset email sent."}, status=status.HTTP_200_OK)
     
 
 class PasswordResetConfirmAPIView(APIView):
+    """Verify token and set new password."""
     permission_classes = [AllowAny]
     serializer_class = PasswordResetConfirmSerializer
 
     def post(self, request, uidb64, token):
+        """
+        Validate reset token and update password.
+        Errors:
+            - 400 invalid uid/token
+        Success:
+            - 200 confirmation message
+        """
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
