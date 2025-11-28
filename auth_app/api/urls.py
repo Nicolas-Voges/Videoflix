@@ -1,3 +1,12 @@
+"""
+URL configuration for API endpoints related to authentication.
+
+This module defines the following public routes:
+- Registration and account activation
+- Email-based JWT authentication (login, refresh, logout)
+- Password reset request and confirmation
+"""
+
 from django.urls import path
 
 from .views import RegisterAPIView, ActivationAPIView, LoginTokenObtainPairView,\
