@@ -16,15 +16,16 @@ def get_content(uidb64, token, instance, content_type):
     """
     frontend_url = getattr(settings, "FRONTEND_URL", "http://localhost:5500")
 
-    html_content = render_to_string(f"emails/{content_type}.html", {"user": instance, "activation_link": f"{frontend_url}/pages/auth/activate.html/?uid={uidb64}&token={token}"})
     match content_type:
         case 'activate_account':
             subject = "Confirm your email"
-            text_content = "This is an important message."
+            text_content = render_to_string(f"emails/{content_type}.txt", {"user": instance, "activation_link": f"{frontend_url}/pages/auth/activate.html/?uid={uidb64}&token={token}"})
+            html_content = render_to_string(f"emails/{content_type}.html", {"user": instance, "activation_link": f"{frontend_url}/pages/auth/activate.html/?uid={uidb64}&token={token}"})
             return (subject, text_content, html_content)
         case 'reset_password':
             subject = "Reset your password"
-            text_content = "This is an important message."
+            text_content = render_to_string(f"emails/{content_type}.txt", {"user": instance, "activation_link": f"{frontend_url}/pages/auth/confirm_password.html/?uid={uidb64}&token={token}"})
+            html_content = render_to_string(f"emails/{content_type}.html", {"user": instance, "activation_link": f"{frontend_url}/pages/auth/confirm_password.html/?uid={uidb64}&token={token}"})
             return (subject, text_content, html_content)
 
 
