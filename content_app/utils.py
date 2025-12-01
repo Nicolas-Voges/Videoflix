@@ -6,6 +6,7 @@ from django.conf import settings
 RESOLUTIONS = {
     "120p": "214x120",
     "360p": "640x360",
+    "480p": "854x480",
     "720p": "1280x720",
     "1080p": "1920x1080",
 }
@@ -32,8 +33,13 @@ def generate_hls_files(input_path: str, video_id: int):
     """
 
     # Create directory for this resolution
-    output_root = Path(settings.MEDIA_ROOT) / f"videos/{video_id}/"
+    output_root = Path(settings.MEDIA_ROOT) / f"video/{video_id}/"
     output_root.mkdir(parents=True, exist_ok=True)
+    try:
+        output_root.mkdir(parents=True, exist_ok=True)
+    except Exception as e:
+        print("Failed to mkdir:", e)
+        raise
 
     master_playlist_content = []
 
@@ -44,7 +50,6 @@ def generate_hls_files(input_path: str, video_id: int):
         # Path to the resolution-specific playlist
         playlist_path = out_dir / "index.m3u8"
 
-        # ffmpeg command to transcode video into HLS segments
         cmd = [
             "ffmpeg",
             "-i", input_path,
@@ -53,7 +58,7 @@ def generate_hls_files(input_path: str, video_id: int):
             "-g", "48",
             "-hls_time", "3",
             "-hls_playlist_type", "vod",
-            str(playlist_path),
+            str(playlist_path)
         ]
 
         # Run ffmpeg and raise error if it fails
