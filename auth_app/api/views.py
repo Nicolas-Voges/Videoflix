@@ -11,6 +11,7 @@ This module provides:
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth import get_user_model
+from django.middleware.csrf import get_token
 
 from rest_framework.response import Response
 from rest_framework.generics import CreateAPIView
@@ -25,6 +26,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework import status
 from rest_framework_simplejwt.serializers import TokenBlacklistSerializer
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.decorators import api_view
 
 from auth_app.api.serializers import PasswordResetConfirmSerializer, RegisterSerializer,\
     EmailLoginTokenObtainPairSerializer, PasswordResetSerializer
@@ -97,7 +99,7 @@ class LoginTokenObtainPairView(TokenObtainPairView):
             value=access,
             httponly=True,
             secure=True,
-            samesite='Lax'
+            samesite='None'
         )
 
         response.set_cookie(
@@ -105,7 +107,7 @@ class LoginTokenObtainPairView(TokenObtainPairView):
             value=refresh,
             httponly=True,
             secure=True,
-            samesite='Lax'
+            samesite='None'
         )
 
         response.data = {
@@ -244,3 +246,22 @@ class PasswordResetConfirmAPIView(APIView):
         user.save()
 
         return Response({"detail": "Password has been reset successfully."}, status=status.HTTP_200_OK)
+    
+
+@api_view(['GET'])
+def csrf(request):
+    """
+    Return a CSRF token for the current client session.
+
+    This view is intended to be used by frontend applications that need to
+    retrieve a valid CSRF token before making state-changing POST, PUT, PATCH,
+    or DELETE requests to the API. It responds with a JSON object containing
+    a freshly generated CSRF token tied to the user's session.
+
+    Args:
+        request (HttpRequest): The incoming HTTP GET request.
+
+    Returns:
+        Response: A JSON response with a `csrfToken` field containing the token.
+    """
+    return Response({'csrfToken': get_token(request)})
