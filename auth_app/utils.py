@@ -39,7 +39,7 @@ def create_uidb64_and_token(instance):
 def send_mail(uidb64, token, instance, content_type):
     """ Send an email (HTML + text fallback) with activation or password reset content. """
     subject, text_content, html_content = get_content(uidb64, token, instance, content_type)
-    from_email = "info@videoflix.com"
+    from_email = os.getenv("DEFAULT_FROM_EMAIL", "team@videoflix.com")
     to = instance.email
     msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
     msg.attach_alternative(html_content, "text/html")
