@@ -36,6 +36,7 @@ class RegisterAPIView(CreateAPIView):
     """"Register a new user and trigger activation email."""
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
+    authentication_classes = []
 
 
 User = get_user_model()

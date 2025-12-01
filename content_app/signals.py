@@ -16,5 +16,8 @@ def start_transcoding_job(sender, instance, created, *args, **kwargs):
     """
     
     if created:
-        queue = django_rq.get_queue("default")
-        queue.enqueue(transcode_video, instance.id)
+        try:
+            queue = django_rq.get_queue("default")
+            queue.enqueue(transcode_video, instance.id)
+        except Exception as e:
+            print(f"Failed to enqueue transcoding job for video {instance.id}: {e}")
