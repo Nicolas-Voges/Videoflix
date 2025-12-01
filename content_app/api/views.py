@@ -33,7 +33,7 @@ def video_playlist_view(request, movie_id: int, resolution: str):
         FileResponse: Returns the playlist file with content type 'application/vnd.apple.mpegurl'.
     """
 
-    playlist_path = Path(settings.MEDIA_ROOT) / f"videos/{movie_id}/{resolution}/index.m3u8"
+    playlist_path = Path(settings.MEDIA_ROOT) / f"video/{movie_id}/{resolution}/index.m3u8"
     if not playlist_path.exists():
         raise Http404("Playlist not found")
 
@@ -50,7 +50,7 @@ def video_segment_view(request, movie_id: int, resolution: str, segment: str):
     Returns:
         FileResponse: Returns the video segment file with content type 'video/mp2t'.
     """
-    segment_path = Path(settings.MEDIA_ROOT) / f"videos/{movie_id}/{resolution}/{segment}"
+    segment_path = Path(settings.MEDIA_ROOT) / f"video/{movie_id}/{resolution}/{segment}"
     if not segment_path.exists():
         raise Http404("Segment not found")
 

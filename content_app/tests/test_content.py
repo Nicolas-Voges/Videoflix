@@ -26,7 +26,7 @@ class VideoListTests(APITestCase):
             description="This is a sample video description.",
             thumbnail_url="http://example.com/thumbnail.jpg",
             category="Sample Category",
-            original_file="videos/originals/test.mp4",
+            original_file="video/originals/test.mp4",
             status="pending"
         )
 
@@ -78,7 +78,7 @@ class VideoStreamingTests(TestCase):
         self.movie_id = 1
         self.resolution = "720p"
 
-        self.base = Path(settings.MEDIA_ROOT) / f"videos/{self.movie_id}/{self.resolution}"
+        self.base = Path(settings.MEDIA_ROOT) / f"video/{self.movie_id}/{self.resolution}"
         self.base.mkdir(parents=True, exist_ok=True)
 
         self.playlist = self.base / "index.m3u8"

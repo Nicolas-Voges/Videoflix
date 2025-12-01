@@ -14,7 +14,7 @@ class Video(models.Model):
     description = models.TextField()
     thumbnail_url = models.URLField()
     category = models.CharField(max_length=100)
-    original_file = models.FileField(upload_to='videos/originals/')
+    original_file = models.FileField(upload_to='video/originals/')
     status = models.CharField(max_length=20, choices=StatusType.choices, default=StatusType.pending)
 
     def __str__(self):
