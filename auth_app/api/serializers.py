@@ -84,12 +84,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         base_username = re.sub(r'[^.\w@+-]', '_', email)
         username = base_username
 
-        # Append a numeric suffix if the username already exists
-        counter = 1
-        while User.objects.filter(username=username).exists():
-            username = f"{base_username}_{counter}"
-            counter += 1
-
         validated_data['username'] = username
         validated_data['is_active'] = False
         user = User.objects.create_user(**validated_data)
