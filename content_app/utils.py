@@ -62,7 +62,7 @@ def generate_hls_files(input_path: str, video_id: int):
         ]
 
         # Run ffmpeg and raise error if it fails
-        subprocess.run(cmd, check=True)
+        subprocess.Popen(cmd)
 
         # Add entry to the master playlist
         master_playlist_content.append(
